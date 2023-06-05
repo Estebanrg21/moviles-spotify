@@ -6,16 +6,14 @@ import retrofit2.Call
 import retrofit2.http.*
 
 interface SpotifyService {
-    @FormUrlEncoded
-    @POST("api/token")
-    fun getAccessToken(
-        @Header("Authorization") authorization: String,
-        @Field("grant_type") grantType: String
-    ): Call<AccessTokenResponse>
+    interface Auth {
+        @FormUrlEncoded
+        @POST("api/token")
+        fun getClientCredentials(
+            @Field("grant_type") grantType: String = "client_credentials"
+        ): Call<AccessTokenResponse>
+    }
 
     @GET("v1/search?type=track")
-    fun searchTrack(
-        @Header("Authorization") authorization: String,
-        @Query("q") query: String
-    ): Call<TrackResponse>
+    fun searchTrack(@Query("q") query: String): Call<TrackResponse>
 }
