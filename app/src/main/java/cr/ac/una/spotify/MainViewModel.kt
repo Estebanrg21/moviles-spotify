@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import cr.ac.una.spotify.http.RESTClient
 import cr.ac.una.spotify.service.SpotifyService
 import androidx.lifecycle.viewModelScope
+import cr.ac.una.spotify.entity.Album
 import cr.ac.una.spotify.entity.Track
 import cr.ac.una.spotify.http.AccessInterceptor
 import kotlinx.coroutines.Dispatchers
@@ -22,9 +23,11 @@ class MainViewModel : ViewModel() {
     private var _searchTrackResults: MutableLiveData<List<Track>> = MutableLiveData()
     private var _errorMessage: MutableLiveData<String> = MutableLiveData()
     private var _currentTrack: MutableLiveData<Track> = MutableLiveData()
+    private var _currentAlbum: MutableLiveData<Album> = MutableLiveData()
     var searchTrackResults: LiveData<List<Track>> = _searchTrackResults
     var errorMessage: LiveData<String> = _errorMessage
     var currentTrack: LiveData<Track> = _currentTrack
+    var currentAlbum: LiveData<Album> = _currentAlbum
 
     fun requestAccessToken() = viewModelScope.launch(Dispatchers.IO) {
         val response = spotifyAuthService.getClientCredentials().execute()
@@ -56,6 +59,18 @@ class MainViewModel : ViewModel() {
         } else {
             System.out.println("Mensaje:    " + response?.raw())
             _errorMessage.value = "Error en la respuesta del servidor."
+        }
+    }
+
+    fun getAlbumInfo(album: Album?) = viewModelScope.launch(Dispatchers.IO) {
+        if (album != null) {
+            val result = spotifyService?.getAlbumInfo(album.id)
+            result?.let {
+                withContext(Dispatchers.Main) {
+                    _currentAlbum.value = it
+                }
+                _currentTrack.value?.album = it
+            }
         }
     }
 
