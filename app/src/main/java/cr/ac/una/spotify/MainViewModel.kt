@@ -21,8 +21,10 @@ class MainViewModel : ViewModel() {
     private var spotifyService: SpotifyService? = null
     private var _searchTrackResults: MutableLiveData<List<Track>> = MutableLiveData()
     private var _errorMessage: MutableLiveData<String> = MutableLiveData()
+    private var _currentTrack: MutableLiveData<Track> = MutableLiveData()
     var searchTrackResults: LiveData<List<Track>> = _searchTrackResults
     var errorMessage: LiveData<String> = _errorMessage
+    var currentTrack: LiveData<Track> = _currentTrack
 
     fun requestAccessToken() = viewModelScope.launch(Dispatchers.IO) {
         val response = spotifyAuthService.getClientCredentials().execute()
@@ -55,5 +57,9 @@ class MainViewModel : ViewModel() {
             System.out.println("Mensaje:    " + response?.raw())
             _errorMessage.value = "Error en la respuesta del servidor."
         }
+    }
+
+    fun setCurrentTrack(track: Track) {
+        _currentTrack.postValue(track)
     }
 }

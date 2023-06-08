@@ -9,6 +9,16 @@
         android:name="cr.ac.una.spotify.FirstFragment"
         android:label="first"
         tools:layout="@layout/fragment_first">
+        <action
+            android:id="@+id/action_FirstFragment_to_AlbumFragment"
+            app:destination="@id/AlbumFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/AlbumFragment"
+        android:name="cr.ac.una.spotify.AlbumFragment"
+        android:label="album"
+        tools:layout="@layout/fragment_album">
 
     </fragment>
 </navigation>

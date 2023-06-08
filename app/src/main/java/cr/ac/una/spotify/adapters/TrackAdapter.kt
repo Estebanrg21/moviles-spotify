@@ -12,7 +12,10 @@ import com.bumptech.glide.RequestManager
 import cr.ac.una.spotify.R
 import cr.ac.una.spotify.entity.Track
 
-class TrackAdapter(private val context: Context,private var tracks: List<Track>) :
+class TrackAdapter(private val context: Context,
+                   private var tracks: List<Track>,
+                   private val onSelectAction: (Track, View) -> Unit
+                   ) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>(){
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.list_item, parent, false)
@@ -38,11 +41,15 @@ class TrackAdapter(private val context: Context,private var tracks: List<Track>)
         val albumImage = itemView.findViewById<ImageButton>(R.id.album_image)
         val trackName = itemView.findViewById<TextView>(R.id.track_name)
         val albumName = itemView.findViewById<TextView>(R.id.album_name)
+        val menuBtn = itemView.findViewById<ImageButton>(R.id.menu_btn)
 
         fun bind(track: Track, glide: RequestManager) {
             trackName.setText(track.name)
             albumName.setText(track.album.name)
             glide.load(track.album.images[0].url).into(albumImage)
+            menuBtn.setOnClickListener{
+                onSelectAction(track, menuBtn)
+            }
         }
     }
 }

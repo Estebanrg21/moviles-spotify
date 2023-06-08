@@ -27,7 +27,8 @@ class FirstFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         var adapter = TrackAdapter(
-            requireContext(), mutableListOf<Track>()
+            requireContext(), mutableListOf<Track>(),
+            (requireActivity() as MainActivity)::openMenu
         )
         binding.list.adapter = adapter
         binding.list.layoutManager = LinearLayoutManager(requireContext())
