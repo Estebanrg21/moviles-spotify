@@ -5,17 +5,20 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.widget.doOnTextChanged
 import androidx.recyclerview.widget.LinearLayoutManager
 import cr.ac.una.spotify.adapters.TrackAdapter
 import cr.ac.una.spotify.databinding.FragmentFirstBinding
 import cr.ac.una.spotify.entity.Track
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class FirstFragment : Fragment() {
 
     private var _binding: FragmentFirstBinding? = null
     private val binding get() = _binding!!
     private lateinit var mainViewModel: MainViewModel
-    private lateinit var tracks :List<Track>
+    private lateinit var tracks: List<Track>
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -36,14 +39,23 @@ class FirstFragment : Fragment() {
 
         mainViewModel = (activity as MainActivity).mainViewModel
 
-        mainViewModel.searchTrackResults.observe(viewLifecycleOwner) {tracks ->
+        mainViewModel.searchTrackResults.observe(viewLifecycleOwner) { tracks ->
             adapter.updateData(tracks as ArrayList<Track>)
             this.tracks = tracks
         }
         binding.buscarBtn.setOnClickListener {
-            mainViewModel.searchTrack(binding.songName.text.toString())
+            val text = binding.songName.text.toString()
+            mainViewModel.searchTrack(text)
+            mainViewModel.saveSearch(text)
+        }
+
+        binding.songName.doOnTextChanged { text, start, before, count ->
+            if (text != null && text.toString().length >= 5) {
+                mainViewModel.searchCriterion(text.toString())
+            }
         }
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()

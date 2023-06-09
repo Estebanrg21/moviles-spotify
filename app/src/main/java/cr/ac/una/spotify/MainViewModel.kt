@@ -6,12 +6,16 @@ import androidx.lifecycle.ViewModel
 import cr.ac.una.spotify.http.RESTClient
 import cr.ac.una.spotify.service.SpotifyService
 import androidx.lifecycle.viewModelScope
+import cr.ac.una.roomdb.BusquedaDAO
+import cr.ac.una.spotify.db.AppDatabase
 import cr.ac.una.spotify.entity.Album
+import cr.ac.una.spotify.entity.Busqueda
 import cr.ac.una.spotify.entity.Track
 import cr.ac.una.spotify.http.AccessInterceptor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.*
 
 class MainViewModel : ViewModel() {
     private val spotifyAuthService: SpotifyService.Auth by lazy {
@@ -19,6 +23,7 @@ class MainViewModel : ViewModel() {
             .getInstance().create(SpotifyService.Auth::class.java)
     }
 
+    private val busquedaDao: MutableLiveData<BusquedaDAO> = MutableLiveData()
     private var spotifyService: SpotifyService? = null
     private var _searchTrackResults: MutableLiveData<List<Track>> = MutableLiveData()
     private var _errorMessage: MutableLiveData<String> = MutableLiveData()
@@ -74,7 +79,19 @@ class MainViewModel : ViewModel() {
         }
     }
 
+    fun saveSearch(text: String) = viewModelScope.launch(Dispatchers.IO) {
+        busquedaDao.value?.insert(Busqueda(null,text, Date()))
+    }
+
     fun setCurrentTrack(track: Track) {
         _currentTrack.postValue(track)
+    }
+
+    fun setBusquedaDAO(dao: BusquedaDAO) = viewModelScope.launch {
+        busquedaDao.value = dao
+    }
+
+    fun searchCriterion(text: String) = viewModelScope.launch(Dispatchers.IO) {
+        println(busquedaDao.value?.getBusquedas(text))
     }
 }

@@ -16,6 +16,7 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import cr.ac.una.spotify.databinding.ActivityMainBinding
+import cr.ac.una.spotify.db.AppDatabase
 import cr.ac.una.spotify.entity.Track
 
 
@@ -37,7 +38,7 @@ class MainActivity : AppCompatActivity() {
         navController = findNavController(R.id.nav_host_fragment_content_main)
         appBarConfiguration = AppBarConfiguration(navController.graph)
         setupActionBarWithNavController(navController, appBarConfiguration)
-
+        mainViewModel.setBusquedaDAO(AppDatabase.getInstance(this).busquedaDao())
         mainViewModel.requestAccessToken()
         mainViewModel.errorMessage.observe(this) { message ->
             if (message.isNotEmpty()) {
