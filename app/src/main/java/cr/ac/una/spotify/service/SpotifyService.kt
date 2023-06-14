@@ -20,4 +20,6 @@ interface SpotifyService {
 
     @GET("v1/albums/{albumId}")
     suspend fun getAlbumInfo(@Path("albumId") albumId: String): Album
+
+
 }

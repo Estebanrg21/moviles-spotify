@@ -1,5 +1,7 @@
 package cr.ac.una.spotify
 
+import android.media.AudioAttributes
+import android.media.MediaPlayer
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -7,7 +9,6 @@ import cr.ac.una.spotify.http.RESTClient
 import cr.ac.una.spotify.service.SpotifyService
 import androidx.lifecycle.viewModelScope
 import cr.ac.una.roomdb.BusquedaDAO
-import cr.ac.una.spotify.db.AppDatabase
 import cr.ac.una.spotify.entity.Album
 import cr.ac.una.spotify.entity.Busqueda
 import cr.ac.una.spotify.entity.Track
@@ -29,6 +30,17 @@ class MainViewModel : ViewModel() {
     private var _errorMessage: MutableLiveData<String> = MutableLiveData()
     private var _currentTrack: MutableLiveData<Track> = MutableLiveData()
     private var _currentAlbum: MutableLiveData<Album> = MutableLiveData()
+    private var _currentTrackPlaying: MutableLiveData<Track> = MutableLiveData()
+    val player by lazy {
+        MediaPlayer().apply {
+            setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                    .setUsage(AudioAttributes.USAGE_MEDIA)
+                    .build()
+            )
+        }
+    }
     var searchTrackResults: LiveData<List<Track>> = _searchTrackResults
     var errorMessage: LiveData<String> = _errorMessage
     var currentTrack: LiveData<Track> = _currentTrack
@@ -80,7 +92,7 @@ class MainViewModel : ViewModel() {
     }
 
     fun saveSearch(text: String) = viewModelScope.launch(Dispatchers.IO) {
-        busquedaDao.value?.insert(Busqueda(null,text, Date()))
+        busquedaDao.value?.insert(Busqueda(null, text, Date()))
     }
 
     fun setCurrentTrack(track: Track) {
@@ -93,5 +105,31 @@ class MainViewModel : ViewModel() {
 
     fun searchCriterion(text: String) = viewModelScope.launch(Dispatchers.IO) {
         println(busquedaDao.value?.getBusquedas(text))
+    }
+
+    fun playTrack(track: Track) {
+        val task = {
+            player.stop()
+            player.reset()
+            player.setDataSource(track.preview)
+            player.prepare()
+            player.start()
+            track.isPlaying = true
+            _currentTrackPlaying.value = track
+        }
+        if (player.isPlaying) {
+            _currentTrackPlaying.value?.isPlaying = false
+            if (_currentTrackPlaying.value != track) {
+                task()
+            } else {
+                player.pause()
+            }
+        } else {
+            if (_currentTrackPlaying.value != track) {
+                task()
+            } else if (!track.isPlaying) {
+                player.start()
+            }
+        }
     }
 }

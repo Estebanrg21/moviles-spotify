@@ -1,17 +1,18 @@
 package cr.ac.una.spotify
 
+import android.content.ComponentName
+import android.media.AudioAttributes
+import android.media.MediaPlayer
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.widget.doOnTextChanged
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import cr.ac.una.spotify.adapters.TrackAdapter
 import cr.ac.una.spotify.databinding.FragmentFirstBinding
 import cr.ac.una.spotify.entity.Track
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 class FirstFragment : Fragment() {
 
@@ -31,7 +32,8 @@ class FirstFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         var adapter = TrackAdapter(
             requireContext(), mutableListOf<Track>(),
-            (requireActivity() as MainActivity)::openMenu
+            (requireActivity() as MainActivity)::openMenu,
+            this::onPlay
         )
         binding.list.adapter = adapter
         binding.list.layoutManager = LinearLayoutManager(requireContext())
@@ -56,6 +58,9 @@ class FirstFragment : Fragment() {
         }
     }
 
+    private fun onPlay(track: Track) {
+        mainViewModel.playTrack(track)
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()

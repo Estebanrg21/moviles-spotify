@@ -14,8 +14,9 @@ import cr.ac.una.spotify.entity.Track
 
 class TrackAdapter(private val context: Context,
                    private var tracks: List<Track>,
-                   private val onSelectAction: (Track, View) -> Unit
-                   ) :
+                   private val onSelectAction: (Track, View) -> Unit,
+                   private val onPlay: (Track)->Unit
+) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>(){
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.list_item, parent, false)
@@ -47,6 +48,9 @@ class TrackAdapter(private val context: Context,
             trackName.setText(track.name)
             albumName.setText(track.album.name)
             glide.load(track.album.images[0].url).into(albumImage)
+            albumImage.setOnClickListener {
+                onPlay(track)
+            }
             menuBtn.setOnClickListener{
                 onSelectAction(track, menuBtn)
             }
