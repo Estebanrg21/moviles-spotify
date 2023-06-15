@@ -10,8 +10,10 @@ import android.view.ViewGroup
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
+import cr.ac.una.spotify.adapters.BusquedaAdapter
 import cr.ac.una.spotify.adapters.TrackAdapter
 import cr.ac.una.spotify.databinding.FragmentFirstBinding
+import cr.ac.una.spotify.entity.Busqueda
 import cr.ac.una.spotify.entity.Track
 
 class FirstFragment : Fragment() {
@@ -35,9 +37,19 @@ class FirstFragment : Fragment() {
             (requireActivity() as MainActivity)::openMenu,
             this::onPlay
         )
+        var adapterBusquedas = BusquedaAdapter(
+            requireContext(), mutableListOf<Busqueda?>()
+        ) {
+            binding.songName.setText(it)
+            binding.busquedaList.visibility = View.GONE
+        }
+
         binding.list.adapter = adapter
         binding.list.layoutManager = LinearLayoutManager(requireContext())
         tracks = mutableListOf<Track>()
+
+        binding.busquedaList.adapter = adapterBusquedas
+        binding.busquedaList.layoutManager = LinearLayoutManager(requireContext())
 
         mainViewModel = (activity as MainActivity).mainViewModel
 
@@ -45,7 +57,19 @@ class FirstFragment : Fragment() {
             adapter.updateData(tracks as ArrayList<Track>)
             this.tracks = tracks
         }
+
+        mainViewModel.busquedaResults.observe(viewLifecycleOwner) { busquedas ->
+            if (busquedas != null) {
+                binding.busquedaList.visibility = View.VISIBLE
+                adapterBusquedas.updateData(busquedas as ArrayList<Busqueda?>)
+            } else {
+                adapterBusquedas.updateData(ArrayList())
+                binding.busquedaList.visibility = View.GONE
+            }
+        }
+
         binding.buscarBtn.setOnClickListener {
+            binding.busquedaList.visibility = View.GONE
             val text = binding.songName.text.toString()
             mainViewModel.searchTrack(text)
             mainViewModel.saveSearch(text)
@@ -54,6 +78,8 @@ class FirstFragment : Fragment() {
         binding.songName.doOnTextChanged { text, start, before, count ->
             if (text != null && text.toString().length >= 5) {
                 mainViewModel.searchCriterion(text.toString())
+            } else {
+                binding.busquedaList.visibility = View.GONE
             }
         }
     }

@@ -41,10 +41,12 @@ class MainViewModel : ViewModel() {
             )
         }
     }
+    private var _busquedaResults: MutableLiveData<List<Busqueda?>?> = MutableLiveData()
     var searchTrackResults: LiveData<List<Track>> = _searchTrackResults
     var errorMessage: LiveData<String> = _errorMessage
     var currentTrack: LiveData<Track> = _currentTrack
     var currentAlbum: LiveData<Album> = _currentAlbum
+    var busquedaResults: LiveData<List<Busqueda?>?> = _busquedaResults
 
     fun requestAccessToken() = viewModelScope.launch(Dispatchers.IO) {
         val response = spotifyAuthService.getClientCredentials().execute()
@@ -104,31 +106,36 @@ class MainViewModel : ViewModel() {
     }
 
     fun searchCriterion(text: String) = viewModelScope.launch(Dispatchers.IO) {
-        println(busquedaDao.value?.getBusquedas(text))
+        val list = busquedaDao.value?.getBusquedas(text)
+        withContext(Dispatchers.Main) {
+            _busquedaResults.value = list
+        }
     }
 
     fun playTrack(track: Track) {
-        val task = {
-            player.stop()
-            player.reset()
-            player.setDataSource(track.preview)
-            player.prepare()
-            player.start()
-            track.isPlaying = true
-            _currentTrackPlaying.value = track
-        }
-        if (player.isPlaying) {
-            _currentTrackPlaying.value?.isPlaying = false
-            if (_currentTrackPlaying.value != track) {
-                task()
-            } else {
-                player.pause()
-            }
-        } else {
-            if (_currentTrackPlaying.value != track) {
-                task()
-            } else if (!track.isPlaying) {
+        track.preview?.let {
+            val task = {
+                player.stop()
+                player.reset()
+                player.setDataSource(track.preview)
+                player.prepare()
                 player.start()
+                track.isPlaying = true
+                _currentTrackPlaying.value = track
+            }
+            if (player.isPlaying) {
+                _currentTrackPlaying.value?.isPlaying = false
+                if (_currentTrackPlaying.value != track) {
+                    task()
+                } else {
+                    player.pause()
+                }
+            } else {
+                if (_currentTrackPlaying.value != track) {
+                    task()
+                } else if (!track.isPlaying) {
+                    player.start()
+                }
             }
         }
     }
