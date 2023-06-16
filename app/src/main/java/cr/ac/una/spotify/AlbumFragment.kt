@@ -30,7 +30,7 @@ class AlbumFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         var adapter = AlbumTrackAdapter(
             requireContext(),
-            mutableListOf<AlbumTrack>()
+            mutableListOf<AlbumTrack>(), this::onPlay
         )
         val glide by lazy { Glide.with(requireContext()) }
         mainViewModel = (activity as MainActivity).mainViewModel
@@ -54,6 +54,10 @@ class AlbumFragment : Fragment() {
         binding.list.adapter = adapter
         binding.list.layoutManager = LinearLayoutManager(requireContext())
         mainViewModel.getAlbumInfo(mainViewModel.currentTrack.value?.album)
+    }
+
+    private fun onPlay(track: AlbumTrack) {
+        mainViewModel.playTrack(track)
     }
 
 }

@@ -12,7 +12,8 @@ import java.util.concurrent.TimeUnit
 
 class AlbumTrackAdapter(
     private val context: Context,
-    private var tracks: List<AlbumTrack>
+    private var tracks: List<AlbumTrack>,
+    private val onPlay: (AlbumTrack)->Unit
 ) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -41,6 +42,7 @@ class AlbumTrackAdapter(
 
         fun bind(track: AlbumTrack) {
             trackName.setText(track.name)
+            trackName.setOnClickListener { onPlay(track) }
             val trackDurationValue = track.duration.toLong()
             trackDuration.setText(String.format(
                 "%02d:%02d",

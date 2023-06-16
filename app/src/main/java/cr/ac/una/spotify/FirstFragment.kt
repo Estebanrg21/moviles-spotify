@@ -60,8 +60,10 @@ class FirstFragment : Fragment() {
 
         mainViewModel.busquedaResults.observe(viewLifecycleOwner) { busquedas ->
             if (busquedas != null) {
-                binding.busquedaList.visibility = View.VISIBLE
-                adapterBusquedas.updateData(busquedas as ArrayList<Busqueda?>)
+                if (busquedas.size >0) {
+                    binding.busquedaList.visibility = View.VISIBLE
+                    adapterBusquedas.updateData(busquedas as ArrayList<Busqueda?>)
+                }
             } else {
                 adapterBusquedas.updateData(ArrayList())
                 binding.busquedaList.visibility = View.GONE

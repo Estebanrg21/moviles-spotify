@@ -9,9 +9,7 @@ import cr.ac.una.spotify.http.RESTClient
 import cr.ac.una.spotify.service.SpotifyService
 import androidx.lifecycle.viewModelScope
 import cr.ac.una.roomdb.BusquedaDAO
-import cr.ac.una.spotify.entity.Album
-import cr.ac.una.spotify.entity.Busqueda
-import cr.ac.una.spotify.entity.Track
+import cr.ac.una.spotify.entity.*
 import cr.ac.una.spotify.http.AccessInterceptor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -30,7 +28,7 @@ class MainViewModel : ViewModel() {
     private var _errorMessage: MutableLiveData<String> = MutableLiveData()
     private var _currentTrack: MutableLiveData<Track> = MutableLiveData()
     private var _currentAlbum: MutableLiveData<Album> = MutableLiveData()
-    private var _currentTrackPlaying: MutableLiveData<Track> = MutableLiveData()
+    private var _currentTrackPlaying: MutableLiveData<PlayableTrack> = MutableLiveData()
     val player by lazy {
         MediaPlayer().apply {
             setAudioAttributes(
@@ -112,12 +110,12 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    fun playTrack(track: Track) {
-        track.preview?.let {
+    fun playTrack(track: PlayableTrack) {
+        track.getPreviewUrl()?.let {
             val task = {
                 player.stop()
                 player.reset()
-                player.setDataSource(track.preview)
+                player.setDataSource(track.getPreviewUrl())
                 player.prepare()
                 player.start()
                 track.isPlaying = true
@@ -139,4 +137,5 @@ class MainViewModel : ViewModel() {
             }
         }
     }
+
 }
